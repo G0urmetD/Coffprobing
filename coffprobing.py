@@ -143,7 +143,7 @@ def main():
     check_version()
 
     parser = argparse.ArgumentParser(description="Coffprobing - Subdomain URL checker")
-    parser.add_argument("-mt", "--mass-target", type=str, required=True, help="Path to file containing subdomains")
+    parser.add_argument("-mt", "--mass-target", type=str, help="Path to file containing subdomains")
     parser.add_argument("-fc", "--filter-code", type=int, help="Filter specific HTTP codes in the output")
     parser.add_argument("-r", "--rate-limit", type=int, default=10, help="Requests per second (default: 10)")
     parser.add_argument("-u", "--update", action="store_true", help="Update the tool to the latest version")
