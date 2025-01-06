@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import time
@@ -9,19 +10,20 @@ from colorama import Fore, Style
 from pathlib import Path
 
 # Constants
-VERSION = "1.1.0"
+VERSION = "1.2"
 BANNER = f"""
 
    ______      ________                 __    _            
   / ____/___  / __/ __/___  _________  / /_  (_)___  ____ _
- / /   / __ \/ /_/ /_/ __ \/ ___/ __ \/ __ \/ / __ \/ __ `/
+ / /   / __ \\/ /_/ /_/ __ \\/ ___/ __ \\/ __ \\/ / __ \\/ __ `/
 / /___/ /_/ / __/ __/ /_/ / /  / /_/ / /_/ / / / / / /_/ / 
-\____/\____/_/ /_/ / .___/_/   \____/_.___/_/_/ /_/\__, /  
+\\____/\\____/_/ /_/ / .___/_/   \\____/_.___/_/_/ /_/\\__, /  
                   /_/                             /____/   {VERSION}
                                                            G0urmetD
 
 """
-GITHUB_RELEASE_URL = "https://api.github.com/repos/G0urmetD/Coffprobing/releases/latest"  # Update this URL
+GITHUB_RELEASE_URL = "https://api.github.com/repos/G0urmetD/Coffprobing/releases/latest"
+GITHUB_RAW_URL = "https://raw.githubusercontent.com/G0urmetD/Coffprobing/main/coffprobing.py"
 
 # Check for latest version
 def check_version():
@@ -37,6 +39,33 @@ def check_version():
             print(f"[{Fore.RED}WRN{Style.RESET_ALL}] Could not verify the latest version.")
     except Exception as e:
         print(f"[{Fore.RED}WRN{Style.RESET_ALL}] Version check failed: {e}")
+
+def update_tool():
+    try:
+        # Downlaod the new version from github
+        response = requests.get(GITHUB_RAW_URL, timeout=10)
+        if response.status_code == 200:
+            new_version_path = "coffprobing_new.py"
+            
+            # Save temporarily the downloaded file
+            with open(new_version_path, "w") as f:
+                f.write(response.text)
+            
+            print(f"{Fore.BLUE}[INF]{Style.RESET_ALL} New version downloaded successfully.")
+            
+            # Replace the current file
+            current_file = os.path.abspath(__file__)
+            backup_file = current_file + ".backup"
+            shutil.copy(current_file, backup_file)  # create a backup
+            
+            shutil.move(new_version_path, current_file)  # Replace
+            print(f"{Fore.GREEN}[SUCCESS]{Style.RESET_ALL} Tool updated successfully! Backup saved as {backup_file}.")
+            print(f"Please restart the tool to use the new version.")
+            sys.exit(0)  # Exit, to use the new version
+        else:
+            print(f"{Fore.RED}[ERR]{Style.RESET_ALL} Failed to fetch the latest version. HTTP Status: {response.status_code}")
+    except Exception as e:
+        print(f"{Fore.RED}[ERR]{Style.RESET_ALL} Update failed: {e}")
 
 # Helper to make requests
 def check_url(url):
@@ -117,8 +146,14 @@ def main():
     parser.add_argument("-mt", "--mass-target", type=str, required=True, help="Path to file containing subdomains")
     parser.add_argument("-fc", "--filter-code", type=int, help="Filter specific HTTP codes in the output")
     parser.add_argument("-r", "--rate-limit", type=int, default=10, help="Requests per second (default: 10)")
+    parser.add_argument("-u", "--update", action="store_true", help="Update the tool to the latest version")
 
     args = parser.parse_args()
+    
+    # Handle the update functionality
+    if args.update:
+        update_tool()
+        return  # No further actions after the update
 
     # Read subdomains from file
     subdomains_file = Path(args.mass_target)
