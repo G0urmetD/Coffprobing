@@ -10,10 +10,16 @@ from pathlib import Path
 
 # Constants
 VERSION = "1.0.0"
-BANNER = r"""
-==============================
-    Coffprobing Tool
-==============================
+BANNER = f"""
+
+   ______      ________                 __    _            
+  / ____/___  / __/ __/___  _________  / /_  (_)___  ____ _
+ / /   / __ \/ /_/ /_/ __ \/ ___/ __ \/ __ \/ / __ \/ __ `/
+/ /___/ /_/ / __/ __/ /_/ / /  / /_/ / /_/ / / / / / /_/ / 
+\____/\____/_/ /_/ / .___/_/   \____/_.___/_/_/ /_/\__, /  
+                  /_/                             /____/   {VERSION}
+                                                           G0urmetD
+
 """
 GITHUB_RELEASE_URL = "https://api.github.com/repos/G0urmetD/Coffprobing/releases/latest"  # Update this URL
 
@@ -24,9 +30,9 @@ def check_version():
         if response.status_code == 200:
             latest_version = response.json().get("tag_name")
             if latest_version == VERSION:
-                print(f"{Fore.BLUE}[INF]{Style.RESET_ALL} Coffprobing version is the [{Fore.GREEN}latest{Style.RESET_ALL}] version ...")
+                print(f"{Fore.BLUE}[INF]{Style.RESET_ALL} Coffprobing has the [{Fore.GREEN}latest{Style.RESET_ALL}] version: {VERSION} ...")
             else:
-                print(f"{Fore.BLUE}[INF]{Style.RESET_ALL} Coffprobing version is an [{Fore.RED}old{Style.RESET_ALL}] version ...")
+                print(f"{Fore.BLUE}[INF]{Style.RESET_ALL} Coffprobing has an [{Fore.RED}old{Style.RESET_ALL}] version: {VERSION} ...")
         else:
             print(f"[{Fore.RED}WRN{Style.RESET_ALL}] Could not verify the latest version.")
     except Exception as e:
@@ -81,15 +87,18 @@ def save_results(grouped_results):
 # Print results
 def print_results(grouped_results, scan_duration):
     for status_code, urls in grouped_results.items():
-        if status_code == 200:
-            color = Fore.GREEN
-        elif 300 <= status_code < 400:
-            color = Fore.YELLOW
-        elif 400 <= status_code < 500:
-            color = Fore.RED
-        elif 500 <= status_code < 600:
-            color = Fore.MAGENTA
-        else:
+        if isinstance(status_code, int):  # Check if the status_code is an integer
+            if status_code == 200:
+                color = Fore.GREEN
+            elif 300 <= status_code < 400:
+                color = Fore.YELLOW
+            elif 400 <= status_code < 500:
+                color = Fore.RED
+            elif 500 <= status_code < 600:
+                color = Fore.MAGENTA
+            else:
+                color = Style.RESET_ALL
+        else:  # For non-integer status codes (e.g., "Unreachable")
             color = Style.RESET_ALL
 
         print(f"[ HTTP-CODE = {status_code} ]")
@@ -97,7 +106,7 @@ def print_results(grouped_results, scan_duration):
             print(f"{color}{url}{Style.RESET_ALL}")
         print()
 
-    print(f"Scan duration: {scan_duration:.2f} seconds")
+    print(f"[{Fore.YELLOW}INF{Style.RESET_ALL}] Scan duration: {scan_duration:.2f} seconds")
 
 # Main function
 def main():
