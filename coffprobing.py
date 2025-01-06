@@ -10,7 +10,7 @@ from colorama import Fore, Style
 from pathlib import Path
 
 # Constants
-VERSION = "1.2"
+VERSION = "1.2.1"
 BANNER = f"""
 
    ______      ________                 __    _            
